@@ -19,11 +19,11 @@ def signupuser(request):
                 user.save()
                 login(request, user)
                 #return render(request, 'todo/login.html')
-                return redirect('loginuser')
+                return redirect('currenttodo')
             except IntegrityError:
                 return render(request, 'todo/signupuser.html', {'form': UserCreationForm(), 'error': "The username has already been taken, please try another one"})
         else:
             return render(request, 'todo/signupuser.html', {'form': UserCreationForm(), 'error': "Password does not match"})
 
-def loginuser(request):
-    return render(request, 'todo/login.html')
+def currenttodo(request):
+    return render(request, 'todo/current.html')
