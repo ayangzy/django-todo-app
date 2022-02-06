@@ -2,6 +2,24 @@
 
 
 {% block content %}
-current
+current todo
+{% for todo in  todos %}
+<ul>
+    <li>
+        {% if todo.important %}
+        <b>{{ todo.title }} </b>
+        {% else %}
+        {{ todo.title }}
+        {% endif %}
+
+        {% if todo.memo %}
+        - {{ todo.memo }}
+        {% endif %}
+       
+    </li>
+</ul>
+{% endfor %}
+
+
 
 {% endblock  %}

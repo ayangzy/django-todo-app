@@ -3,6 +3,8 @@ from xml.etree.ElementTree import Comment
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
+
+from todo.models import Todo
 from .forms import TodoForm
 from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
@@ -47,7 +49,10 @@ def loginuser(request):
 
 
 def currenttodo(request):
-    return render(request, 'todo/current.html')
+    #Todo.objects.all() //get all todos
+    # Get current user todos
+    todos = Todo.objects.filter(user=request.user, datecompleted__isnull=True)
+    return render(request, 'todo/current.html', {'todos': todos})
 
 
 def createtodo(request):
