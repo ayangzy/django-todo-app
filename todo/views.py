@@ -1,6 +1,6 @@
 from pickle import NONE
 from xml.etree.ElementTree import Comment
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 
@@ -49,7 +49,7 @@ def loginuser(request):
 
 
 def currenttodo(request):
-    #Todo.objects.all() //get all todos
+    # Todo.objects.all() //get all todos
     # Get current user todos
     todos = Todo.objects.filter(user=request.user, datecompleted__isnull=True)
     return render(request, 'todo/current.html', {'todos': todos})
@@ -65,8 +65,24 @@ def createtodo(request):
             newtodo.user = request.user
             newtodo.save()
             return redirect('currenttodo')
-        except:ValueError
+        except:
+            ValueError
         return render(request, 'todo/createtodo.html', {'form': TodoForm, 'error': 'Todo title is too long'})
+
+
+def viewtodo(request, todo_pk):
+    todo = get_object_or_404(Todo, pk=todo_pk, user=request.user)
+    if request.method == 'GET':
+        form = TodoForm(instance=todo)
+        return render(request, 'todo/viewtodo.html', {'todo': todo, 'form': form})
+    else:
+        try:
+            form = TodoForm(request.POST,instance=todo)
+            form.save()
+            return redirect('currenttodo')
+        except:ValueError
+        return render(request, 'todo/viewtodo.html', {'todo': todo, 'form': form, 'error': 'Bad request'})
+        
 
 
 def logoutuser(request):
