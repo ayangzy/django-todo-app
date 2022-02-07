@@ -4,11 +4,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.utils import timezone
+from pytest import Instance
+from sqlalchemy import true
 
 from todo.models import Todo
 from .forms import TodoForm
 from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -49,13 +52,14 @@ def loginuser(request):
             return redirect('currenttodo')
 
 
+@login_required
 def currenttodo(request):
     # Todo.objects.all() //get all todos
     # Get current user todos
     todos = Todo.objects.filter(user=request.user, datecompleted__isnull=True)
     return render(request, 'todo/current.html', {'todos': todos})
 
-
+@login_required
 def createtodo(request):
     if request.method == 'GET':
         return render(request, 'todo/createtodo.html', {'form': TodoForm})
@@ -70,7 +74,7 @@ def createtodo(request):
             ValueError
         return render(request, 'todo/createtodo.html', {'form': TodoForm, 'error': 'Todo title is too long'})
 
-
+@login_required
 def viewtodo(request, todo_pk):
     todo = get_object_or_404(Todo, pk=todo_pk, user=request.user)
     if request.method == 'GET':
@@ -84,7 +88,7 @@ def viewtodo(request, todo_pk):
         except: ValueError
         return render(request, 'todo/viewtodo.html', {'todo': todo, 'form': form, 'error': 'Bad request'})
 
-
+@login_required
 def completetodo(request, todo_pk):
     todo = get_object_or_404(Todo, pk=todo_pk, user=request.user)
     if request.method == 'POST':
@@ -92,14 +96,20 @@ def completetodo(request, todo_pk):
         todo.save()
         return redirect('currenttodo')
     
-    
+@login_required   
 def deletetodo(request, todo_pk):
     todo = get_object_or_404(Todo, pk=todo_pk, user=request.user)
     if request.method == 'POST':
         todo.delete()
         return redirect('currenttodo')
-        
     
+@login_required        
+def completedtodo(request):
+    
+    todos = Todo.objects.filter(user=request.user, datecompleted__isnull=False)
+    return render(request, 'todo/completedtodo.html', {'todos': todos})
+ 
+@login_required   
 def logoutuser(request):
     if request.method == 'POST':
         logout(request)
